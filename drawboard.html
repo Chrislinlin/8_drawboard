@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>canvas簡易畫板</title>
+	<style>
+		body, div {
+			margin: 0;
+			padding: 0;
+			text-align: center;
+			background-color: rgb(136, 197, 221);
+		}
+		*{
+			padding: 0;
+			margin: 0;
+			list-style: none;
+		}
+		h1{
+			width: 100%;
+			background:linear-gradient(0deg,rgba(0, 167, 218, 0.884),rgba(236, 228, 228, 0.863));
+			color: rgb(255, 255, 255);
+		}
+		.container{
+			width: 100%;
+			height: 100vh;
+		}
+		#bk {
+			margin: 10px auto;
+			width: 600px;
+			height: 36px;
+		}
+		.bk {
+			width: 20px;
+			height: 20px;
+			display: inline-block;
+			margin: 12px;
+			border: 1px dotted gray;
+		}
+		#cav {
+			border: 1px solid #ddd;
+			background-color: #fff;
+			
+			
+		}
+		
+		.cloud{
+			background:#fff;
+			width: 160px;
+			position: relative;
+			border-radius: 200px;
+			height: 40px;
+			margin: 30px 0;
+			z-index:0;
+		}
+		
+		.cloud::before{
+			content: "";
+			width: 60px;
+			height: 60px;
+			position: absolute;
+			background: #fff;
+			display: block;
+			top: -25px;
+			left: 20px;
+			border-radius: 100%;
+		}
+		.cloud::after{
+			content: "";
+			width: 80px;
+			height: 80px;
+			position: absolute;
+			background: #fff;
+			display: inline-block;
+			top: -40px;
+			right: 20px;
+			border-radius: 100%;
+		}
+
+
+		/*不同大小的雲 不同大小的雲跑的速度不同*/
+		.xl-cloud{
+		transform:scale(1.2);
+		animation: floating-cloud 20s 4s linear infinite;
+		-webkit-animation: floating-cloud 20s 4s linear infinite;
+		margin:50px 0px 50px 0px;
+		}
+
+		.l-cloud{
+		animation: floating-cloud 26s 0.2s linear infinite;
+		-webkit-animation: floating-cloud 26s 0.2s linear infinite;
+		transform:scale(1.0);
+		margin:40px 0px 40px 0px;
+		}
+		
+		.m-cloud{
+		animation: floating-cloud 16s 3s linear infinite;
+		-webkit-animation: floating-cloud 16s 3s linear infinite;
+		transform:scale(0.8);
+		}
+
+		/*關鍵影格部分*/
+		@keyframes floating-cloud{
+			0%{margin-left:-600px;}
+
+			100%{margin-left:100%;}
+		} 
+
+
+	</style>
+</head>
+<body>
+	<h1>Chriss drawboard</h1>
+	<div class="container">
+		<div id="bk"></div>
+		<canvas id="cav" width="600" height="400"></canvas>
+		<div class="wrapper">
+			<div class="xl-cloud">
+				<div class="cloud"></div>
+			</div>
+			<div class="l-cloud">
+				<div class="cloud"></div>
+			</div>
+			<div class="m-cloud">
+				<div class="cloud"></div>
+			</div>
+
+		</div>
+
+
+	</div>
+
+
+    <!--決定canvas畫板寬高-->
+	<script>
+        var canvas = document.getElementById('cav');
+        //抓取canvas的標籤
+		var ctx = canvas.getContext('2d'); //告訴瀏覽器我們是要畫２d的圖
+        //指定繪圖方式
+        var $bk = document.getElementById('bk');
+		var bColor = ['#000000', '#999999', '#CC66FF', '#FF0000', '#FF9900', '#FFFF00','#FFFFFF', '#008000', '#00CCFF'];
+		var col = "#FF0000";
+		var fragment = document.createDocumentFragment();
+			//creatDocumentFragment，DocumentFragment 就是一個不存在的元素物件，所以對他做的code都不會影響整個使用者觀看的外觀，所以速度會變快。
+
+		var $span = null;
+		function initBrush() {
+			for(var i=0; i<bColor.length; i++) {
+				$span = document.createElement('span');
+				$span.className = 'bk';
+				$span.style.backgroundColor = bColor[i];
+				$span.onclick = function() {
+					col = window.getComputedStyle(this, null).getPropertyValue('background-color');
+                    //獲取當前元素最終使用css的屬性的值，getComputedStyle("元素", "惟類"), getPropertyValue 指的是獲得某個具體的屬性值（！！他不適用駝峰命名）
+                }
+				fragment.appendChild($span);
+			}
+			$bk.appendChild(fragment);
+		}
+		function initPainter() {
+			canvas.onmousedown = function(e) {
+				//鼠標按下事件跟mouse event 依樣只是他是反模式= canvas.addEventListener("mousedown", function(){...})
+				ctx.lineWidth = 2;
+				ctx.strokeStyle = col;
+				var x = e.offsetX;
+				var y = e.offsetY;
+				ctx.beginPath(); //畫筆一開始產生一個新路徑，之後在用指令去設置路徑，當目前路徑為空(例如接著呼叫beginPath()完後)或是在一個新畫布上，
+				ctx.moveTo(x, y); //不論為何，第一個路徑繪圖指令總是moveTo()；因為每當重設路徑後，你幾乎都會需要設定繪圖起始點。
+				canvas.onmousemove = function(e) {
+					var nx = e.offsetX;
+					var ny = e.offsetY;
+					ctx.lineTo(x, y);
+					ctx.stroke(); //畫出圖形的邊框
+					x = nx;
+					y = ny;
+				}
+				document.onmouseup = function() {
+					canvas.onmousemove = null;
+				}
+			}
+		}
+		window.onload = function() {
+			initBrush();
+			initPainter();
+		}	
+	</script>
+</body>
+</html>
